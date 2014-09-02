@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using DedStore.System;
 using DedStore.Tests.DummyTypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,6 +18,18 @@ namespace DedStore.Tests
         private Guid _guid2 = new Guid("13bc2d52-fdc2-4e56-962b-3bdd01ef7711");
         private Guid _guid3 = new Guid("919136d3-1bcd-4d30-93f8-264345557fea");
         private Guid _guid4 = new Guid("3c3e0990-6957-4ed7-b5f3-15dc6e3f5b08");
+
+        private void teardown()
+        {
+            Directory.Delete(@"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles", true);
+            using (var c = new DedStoreContext())
+            {
+                var t = c.GetTable<Person>();
+                var t2 = c.GetTable<EmployeeType>();
+                var t3 = c.GetTable<IntranetPage>();
+                var t4 = c.GetTable<RubbishType>();
+            }
+        }
 
         [TestMethod]
         public void Test_System_Types_Registered()
@@ -39,9 +52,7 @@ namespace DedStore.Tests
 
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<RegisteredType>();
-
-
+                teardown();
                 var persons = new List<Person>
                 {
                     new Person {Id = 1, Name = "Person A"},
@@ -53,14 +64,14 @@ namespace DedStore.Tests
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.Person.deds";
                 const string filePath2 =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\SystemTables\DedStore.System.LatestIntegerPrimaryKey.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
                 var json2 =
                     JsonConvert.SerializeObject(new[]{ new LatestIntegerPrimaryKey
                     {
                         Id = typeof (Person).FullName,
                         LatestValue = 33
                     }});
-                File.WriteAllText(filePath2, json2);
+                File.WriteAllText(filePath2, json2, Encoding.Unicode);
 
 
 
@@ -111,9 +122,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<RegisteredType>();
-
-
+                teardown();
+                
                 var pages = new List<IntranetPage>
                 {
                     new IntranetPage {Id = _guid1, Name = "Page A"},
@@ -123,7 +133,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(pages);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.IntranetPage.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 var page = new IntranetPage { Name = "Rob--" + Guid.NewGuid(), Id = Guid.NewGuid() };
 
@@ -145,7 +155,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<RegisteredType>();
+                teardown();
+                
 
 
                 var pages = new List<IntranetPage>
@@ -157,7 +168,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(pages);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.IntranetPage.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 var page = new IntranetPage { Name = "Rob--" + Guid.NewGuid(), Id = _guid3 };
 
@@ -180,7 +191,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<RegisteredType>();
+                teardown();
+                
 
                 var emps = new List<EmployeeType>
                 {
@@ -191,7 +203,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(emps);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.EmployeeType.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
 
@@ -208,7 +220,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<RegisteredType>();
+                teardown();
+                
 
                 var emps = new List<EmployeeType>
                 {
@@ -219,7 +232,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(emps);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.EmployeeType.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type2" };
 
@@ -238,7 +251,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<RegisteredType>();
+                teardown();
+                
 
                 var rubbishes = new List<RubbishType>
                 {
@@ -249,7 +263,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(rubbishes);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.RubbishType.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 var page = new RubbishType { Name = "Rob--" + Guid.NewGuid(), Id = DateTime.Now };
 
@@ -271,6 +285,7 @@ namespace DedStore.Tests
         [TestMethod]
         public void Test_Type_Change_Fail()
         {
+            teardown();
             // THIS CAN'T BE A UNIT TEST, BUT I HAVE TESTED IT!
             Assert.IsFalse(false);
         }
@@ -280,7 +295,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<RegisteredType>();
+                teardown();
+                
 
                 var emps = new List<EmployeeType>
                 {
@@ -291,7 +307,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(emps);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.EmployeeType.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
 
@@ -316,7 +332,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<RegisteredType>();
+                teardown();
+                
 
                 var emps = new List<EmployeeType>
                 {
@@ -327,7 +344,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(emps);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.EmployeeType.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
 
@@ -351,7 +368,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<RegisteredType>();
+                teardown();
+                
 
                 var emps = new List<EmployeeType>
                 {
@@ -362,7 +380,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(emps);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.EmployeeType.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
 
@@ -380,7 +398,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<RegisteredType>();
+                teardown();
+                
 
                 var emps = new List<IntranetPage>
                 {
@@ -391,7 +410,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(emps);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.IntranetPage.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
 
@@ -416,7 +435,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<RegisteredType>();
+                teardown();
+                
 
                 var emps = new List<IntranetPage>
                 {
@@ -427,7 +447,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(emps);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.IntranetPage.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
 
@@ -451,7 +471,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<RegisteredType>();
+                teardown();
+                
 
                 var emps = new List<IntranetPage>
                 {
@@ -462,7 +483,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(emps);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.IntranetPage.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
 
@@ -480,7 +501,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<Person>();
+                teardown();
+                
 
                 var emps = new List<Person>
                 {
@@ -491,7 +513,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(emps);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.Person.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
 
@@ -516,7 +538,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<Person>();
+                teardown();
+                
 
                 var emps = new List<Person>
                 {
@@ -527,7 +550,7 @@ namespace DedStore.Tests
                 var json = JsonConvert.SerializeObject(emps);
                 const string filePath =
                     @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.Person.deds";
-                File.WriteAllText(filePath, json);
+                File.WriteAllText(filePath, json, Encoding.Unicode);
 
                 //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
 
@@ -551,7 +574,8 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<Person>();
+                teardown();
+                
 
                 var emps = new List<Person>
                 {
@@ -562,7 +586,7 @@ namespace DedStore.Tests
 
                 //var json = JsonConvert.SerializeObject(emps);
                 //const string filePath =
-                  // @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.Person.deds";
+                // @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.Person.deds";
                 //File.WriteAllText(filePath, json);
 
                 var table = ctx.GetTable<Person>();
@@ -588,7 +612,7 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var checkTable = ctx.GetTable<Person>();
+                teardown();
 
                 var emps = new List<Person>
                 {
@@ -596,44 +620,74 @@ namespace DedStore.Tests
                     new Person {Id = 2, Name = "Person B"},
                     new Person {Id = 3, Name = "Person C"}
                 };
-                var json = JsonConvert.SerializeObject(emps);
-                const string filePath =
-                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.Person.deds";
-                const string filePath2 =
-                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\SystemTables\DedStore.System.LatestIntegerPrimaryKey.deds";
-                File.WriteAllText(filePath, json);
-                var json2 =
-                    JsonConvert.SerializeObject(new[]{ new LatestIntegerPrimaryKey
-                    {
-                        Id = typeof (Person).FullName,
-                        LatestValue = 3
-                    }});
-                File.WriteAllText(filePath2, json2);
-
-                var table = ctx.GetTable<Person>();
                 
-                var result = table.Clear();
+                var table = ctx.GetTable<Person>();
+                var result = table.AddMany(emps);
+                result = ctx.Commit();
+                Assert.IsTrue(table.Sum(x=>x.Id)==6);
+
+                result = table.Clear();
                 result = ctx.Commit();
                 Assert.IsTrue(table.Count() == 0);
-                
+
                 result = table.AddMany(emps);
                 result = ctx.Commit();
                 Assert.IsTrue(table.Count() == 3);
 
                 table.First().Name = "TEST CHANGED";
-                result = table.UpdateMany(emps);
+                Assert.IsFalse(emps.First().Name== "TEST CHANGED");
+                result = table.UpdateMany(table);
                 result = ctx.Commit();
-                Assert.IsTrue(table.First().Name =="TEST CHANGED");
-                
-                result = table.RemoveMany(emps);
+                Assert.IsTrue(table.First().Name == "TEST CHANGED");
+
+                result = table.RemoveMany(table);
                 result = ctx.Commit();
-                Assert.IsTrue(table.Count() ==0);
-                
+                Assert.IsTrue(table.Count() == 0);
+
                 result = table.AddMany(emps);
                 result = ctx.Commit();
                 Assert.IsTrue(table.Last().Id ==9);
             }
         }
 
+        [TestMethod]
+        public void Test_Delete_Folder_Then_Add_Three_People_Twice_And_Count_Pks()
+        {
+            teardown();
+            var peopleToAdd = new List<Person>
+            {
+                new Person{Id=1, Name = "Name 1"},
+                new Person{Id=2, Name = "Name 2"},
+                new Person{Id=3, Name = "Name 3"}
+            };
+
+            using (var ctx = new DedStoreContext())
+            {
+                var people = ctx.GetTable<Person>();
+                people.AddMany(peopleToAdd);
+                var result = ctx.Commit();
+                Assert.IsTrue(result.Success);
+                var count = people.Sum(x => x.Id);
+                Assert.IsTrue(count == 6);
+            }
+
+            using (var ctx = new DedStoreContext())
+            {
+                peopleToAdd = new List<Person>
+                {
+                    new Person{Id=1, Name = "Name 1"},
+                    new Person{Id=2, Name = "Name 2"},
+                    new Person{Id=3, Name = "Name 3"}
+                };
+                var people = ctx.GetTable<Person>();
+                people.AddMany(peopleToAdd);
+                var result = ctx.Commit();
+                Assert.IsTrue(result.Success);
+                var count = people.Sum(x => x.Id);
+                Assert.IsTrue(count == 21);
+            }
+        }
+
+        
     }
 }

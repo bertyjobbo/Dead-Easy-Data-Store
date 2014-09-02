@@ -51,9 +51,14 @@ namespace DedStore
         public DedStoreTable<T> GetTable<T>()
         {
             var type = typeof(T);
+            var read = readTextToCollection(type);
             if (!CollectionsInContext.ContainsKey(type))
             {
-                CollectionsInContext.Add(type, readTextToCollection(type));
+                CollectionsInContext.Add(type, read);
+            }
+            else
+            {
+                CollectionsInContext[type] = read;
             }
             var table = new DedStoreTable<T>(this);
             return table;
@@ -116,11 +121,14 @@ namespace DedStore
                 var latest = table.FirstOrDefault(x => x.Id == type.FullName);
                 if (latest == null)
                 {
-                    table.Add(new LatestIntegerPrimaryKey
+                    latest = new LatestIntegerPrimaryKey
                     {
                         Id = type.FullName,
                         LatestValue = 1
-                    });
+                    };
+                    table.Add(latest);
+                    var commitResult1 = ctx.Commit();
+                    if (!commitResult1.Success) throw new Exception(commitResult1.ErrorMessage);
                     return 1;
                 }
 

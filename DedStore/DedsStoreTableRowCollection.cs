@@ -103,8 +103,8 @@ namespace DedStore
 
                 // ok
                 found.Updated = true;
-                found.RawItem = item;
-                found.SetRawItemPrimaryKey(found.PrimaryKey, PrimaryKeyPropertyInfo);
+                //found.RawItem = item;
+                //found.SetRawItemPrimaryKey(found.PrimaryKey, PrimaryKeyPropertyInfo);
                 ItemsToUpdate.Add(found);
             }
             else
