@@ -12,7 +12,24 @@ namespace Deds
     public class DedsConnection : IDisposable
     {
         // fields
-        private readonly IDictionary<Type, object> _tables = new Dictionary<Type, object>();
+        private readonly IDedsConnectionContext _ctx;
+
+        /// <summary>
+        /// Constructor for testing
+        /// </summary>
+        /// <param name="ctx"></param>
+        public DedsConnection(IDedsConnectionContext ctx)
+        {
+            _ctx = ctx;
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public DedsConnection()
+        {
+            _ctx = DedsConnectionContext.Current;
+        }
 
         /// <summary>
         /// Table
@@ -21,22 +38,18 @@ namespace Deds
         /// <returns></returns>
         public DedsTable<T> Table<T>()
         {
-            var lockObj = new object();
-            lock (lockObj)
-            {
-                var typeOf = typeof (T);
-                if (!_tables.ContainsKey(typeOf))
-                {
-                    _tables.Add(new KeyValuePair<Type, object>(typeOf, readTable<T>()));
-                }
-                return (DedsTable<T>) _tables[typeOf];
-            }
+            var pair = _ctx.GetTableRowsPair<T>();
+            return pair.Table;
         }
 
-        private DedsTable<T> readTable<T>()
+        /// <summary>
+        /// Save changes
+        /// </summary>
+        /// <returns></returns>
+        public DedsResponse SaveChanges()
         {
-            return new DedsTable<T>();
-        }
+            throw new NotImplementedException();
+        } 
 
         /// <summary>
         /// Dispose

@@ -15,7 +15,7 @@ namespace Deds.Harness
             {
                 for (var i = 0; i < 10; i++)
                 {
-                    deds.Table<MyCustomType>().Add(new MyCustomType {Name = "Rob" + i, Date = DateTime.Now});
+                    deds.Table<MyCustomType>().Create(new MyCustomType {Name = "Rob" + i, Date = DateTime.Now});
                 }
 
                 foreach (var result in deds.Table<MyCustomType>()) 

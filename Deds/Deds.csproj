@@ -30,7 +30,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -39,14 +43,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DedsConnectionContext.cs" />
     <Compile Include="DedsKeyAttribute.cs" />
     <Compile Include="DedsConnection.cs" />
+    <Compile Include="DedsTableRow.cs" />
     <Compile Include="DedsResponse.cs" />
     <Compile Include="DedsResponseType.cs" />
     <Compile Include="DedsTable.cs" />
+    <Compile Include="DedsTableRowCollection.cs" />
+    <Compile Include="DedsTableRowsPair.cs" />
+    <Compile Include="IDedsConnectionContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

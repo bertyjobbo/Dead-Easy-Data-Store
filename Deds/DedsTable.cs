@@ -8,35 +8,21 @@ using System.Threading.Tasks;
 
 namespace Deds
 {
+    public class DedsTable
+    {
+    }
+
     /// <summary>
     /// Deds table
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class DedsTable<T> : IEnumerable<T>
+    public class DedsTable<T> : DedsTable, IEnumerable<T>
     {
-        // fields
-        private readonly List<T> _innerList = new List<T>();
-        private readonly Type _typeOfT = typeof(T);
-        private readonly Type _typeOfPrimaryKeyAttr = typeof(DedsKeyAttribute);
-        private readonly PropertyInfo _primaryKeyInfo;
+        #region INNER
 
-        #region INIT
-
-        public DedsTable()
-        {
-            // TODO CACHE THIS
-            var props = _typeOfT.GetProperties();
-
-            // attrs
-            var attrs = props.Where(prop => prop.CustomAttributes.Any(a => a.AttributeType == _typeOfPrimaryKeyAttr)).ToList();
-
-            // checks
-            if (attrs.Count < 1) throw new Exception("Type " + _typeOfT.Name + " has no DedsKey attribute");
-            if (attrs.Count > 1) throw new Exception("Type " + _typeOfT.Name + " has more than one DedsKey attribute");
-
-            // all good
-            _primaryKeyInfo = attrs.First();
-        }
+        // internal
+        internal DedsTableRowCollection<T> InnerList { get; set; }
+        internal IEnumerable<T> InnerEnumerable { get { return InnerList.List.Select(x => x.Value); } }
 
         #endregion
 
@@ -48,16 +34,50 @@ namespace Deds
         /// <param name="item"></param>
         public DedsResponse<T> Create(T item)
         {
-            var lockObj = new object();
-            lock (lockObj)
+            // start
+            var resp = new DedsResponse<T>
             {
-                // NEED TO GET NEXT PRIMARY KEY HERE!!
+                ResponseType = DedsResponseType.Create
+            };
 
-                // DO YOU IMPLEMENT "FIND" FIRST
+            try
+            {
 
-                // DOES THE INNER LIST HAVE A WRAPPER-TYPE WHICH HAS THE OBJECT ON ONE SIDE, AND SOME METADATA WITH IT?? (IE THE PRIMARY KEY)
-                // -- this would be set when the table is read / an item is created
+                // pk val
+                object pkVal;
+
+                // find primary key
+                if (InnerList.TypeOfPrimaryKey == typeof (int))
+                {
+                    var max = InnerList.List.Count == 0 ? 0: InnerList.List.Max(x => ((int) x.PrimaryKeyValue));
+                    pkVal = max + 1;
+                    InnerList.PrimaryKeyPropertyInfo.SetValue(item, pkVal);
+                    
+                }
+                else
+                {
+                    pkVal = InnerList.PrimaryKeyPropertyInfo.GetValue(item);
+                    if (pkVal == null)
+                    {
+                        throw new Exception("Set primary key value, string or Guid");
+                    }
+                }
+
+                // add
+                InnerList.List.Add(new DedsTableRow<T>
+                {
+                    PrimaryKeyValue = pkVal,
+                    Value = item
+                });
             }
+            catch (Exception ex)
+            {
+                resp.ErrorMessage = ex.Message +
+                                    (ex.InnerException == null ? "" : ". InnerException: " + ex.InnerException.Message);
+            }
+
+            resp.ResponseItem = item;
+            return resp;
         }
 
         /// <summary>
@@ -82,7 +102,7 @@ namespace Deds
         /// Remove
         /// </summary>
         /// <param name="primaryKeyValue"></param>
-        public DedsResponse<T> Delete(object primaryKeyValue)
+        public DedsResponse Delete(object primaryKeyValue)
         {
             throw new NotImplementedException();
         }
@@ -97,28 +117,29 @@ namespace Deds
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Save changes
-        /// </summary>
-        public void SaveChanges()
-        {
-        }
-
         #endregion
-
 
         #region other
 
-        public int Count { get { return _innerList.Count; } }
+        /// <summary>
+        /// Count
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                return InnerList.List.Count;
+            }
+        }
+
 
         #endregion
-
 
         #region enumerator
 
         public IEnumerator<T> GetEnumerator()
         {
-            return _innerList.GetEnumerator()
+            return InnerEnumerable.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

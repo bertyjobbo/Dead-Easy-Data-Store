@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 
 namespace Deds
 {
-    public class DedsResponse<T>
+    public class DedsResponse
     {
         public string ErrorMessage { get; set; }
         public bool Success { get { return !string.IsNullOrEmpty(ErrorMessage); } }
-        public T ResponseItemOrNullIfDelete { get; set; }
+        public DedsResponseType ResponseType { get; set; }
+    }
+
+    public class DedsResponse<T> : DedsResponse
+    {
+        public T ResponseItem { get; set; }
     }
 }
