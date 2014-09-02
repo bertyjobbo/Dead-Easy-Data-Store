@@ -164,7 +164,7 @@ namespace Deds
 
             foreach (var result in results)
             {
-                output.List.Add(new DedsTableRow
+                ((IList)output.List).Add(new DedsTableRow
                 {
                     Value = result, PrimaryKeyValue = pkPropInfo.GetValue(result)
                 });
