@@ -12,6 +12,6 @@ namespace Deds
     public interface IDedsConnectionContext
     {
         DedsTableRowsPair<T> GetTableRowsPair<T>();
-
+        void Commit();
     }
 }

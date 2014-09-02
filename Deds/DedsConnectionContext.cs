@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -67,6 +68,115 @@ namespace Deds
         }
 
         /// <summary>
+        /// Commit
+        /// </summary>
+        public void Commit()
+        {
+            lock (_lockObj)
+            {
+                foreach (var item in _tablesAndRows)
+                {
+                    var pkCounter = 0;
+
+                    // table
+                    var table = item.Value.Rows;
+                    var typeOfPk = item.Value.Rows.TypeOfPrimaryKey;
+                    var pkPropInfo = item.Value.Rows.PrimaryKeyPropertyInfo;
+                    var typeOf = item.Value.Rows.TypeOfT;
+                    var filePath = getPathForType(table.TypeOfT);
+                    var freshTable = getRowCollection(typeOf,typeOfPk, pkPropInfo, filePath);
+
+                    // string builder
+                    var str = new StringBuilder("[");
+
+                    // loop
+                    foreach (var row in table.List)
+                    {
+                        // get val
+                        var val = row.Value;
+
+                        if (row.Added)
+                        {
+                            // pk val
+                            object pkVal;
+
+                            // find primary key
+                            if (typeOfPk == typeof (int))
+                            {
+                                if (pkCounter == 0)
+                                {
+                                    var max = ((IList) freshTable.List).Count == 0
+                                        ? 0
+                                        : freshTable.List.Max(x => ((int) x.PrimaryKeyValue));
+                                    pkVal = max + 1;
+                                    pkCounter = (int) pkVal;
+                                }
+                                else
+                                {
+                                    pkVal = pkCounter++;
+                                }
+
+                                pkPropInfo.SetValue(val, pkVal);
+                            }
+                            else
+                            {
+                                pkVal = pkPropInfo.GetValue(item);
+                                if (pkVal == null)
+                                {
+                                    throw new Exception("Set primary key value, string or Guid");
+                                }
+                            }
+                        }
+
+                        str.Append(JsonConvert.SerializeObject(val));
+                        str.Append(",");
+                    }
+
+
+                    // final 
+                    var final = str.ToString().TrimEnd(',') + "]";
+
+                    // 
+                    File.WriteAllText(filePath, final);
+
+                }
+
+                // kill cache
+                _tablesAndRows.Clear();
+            }
+        }
+
+
+        private DedsTableRowCollection getRowCollection(Type typeOf, Type typeOfPk, PropertyInfo pkPropInfo, string filePath)
+        {
+            var output = new DedsTableRowCollection
+            {
+                TypeOfT = typeOf,
+                TypeOfPrimaryKey = typeOfPk,
+                PrimaryKeyPropertyInfo = pkPropInfo
+            };
+
+            // get non-generic type
+            var nonGenericType = typeof (IList<>).MakeGenericType(typeOf);
+
+            // get data
+            var results =  (IList)JsonConvert.DeserializeObject(File.ReadAllText(filePath), nonGenericType);
+
+            foreach (var result in results)
+            {
+                output.List.Add(new DedsTableRow
+                {
+                    Value = result, PrimaryKeyValue = pkPropInfo.GetValue(result)
+                });
+            }
+            
+            return output;
+
+
+        }
+
+
+        /// <summary>
         /// Read table
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -121,20 +231,20 @@ namespace Deds
 
                 // read
                 var jsonResults = JsonConvert.DeserializeObject<List<T>>(json);
-
+                output.Rows.List=new List<DedsTableRow<T>>();
                 foreach (var item in jsonResults)
                 {
                     var newRow = new DedsTableRow<T>
                     {
-                        PrimaryKeyValue = pkProp.GetValue(item)
+                        PrimaryKeyValue = pkProp.GetValue(item), Value = item
                     };
-                    collection.List.Add(newRow);
+                    output.Rows.List.Add(newRow);
                 }
 
                 //
                 output.Table = new DedsTable<T>
                 {
-                    InnerList = collection
+                    InnerList = output.Rows
                 };
                 return output;
             }
@@ -149,6 +259,16 @@ namespace Deds
         private string getPathForType<T>()
         {
             return Path.Combine(_folderPath, typeof(T).FullName + ".deds");
+        }
+
+        /// <summary>
+        /// Get file path for type
+        /// </summary>
+        /// <param name="typeOfT"></param>
+        /// <returns></returns>
+        private string getPathForType(Type typeOfT)
+        {
+            return Path.Combine(_folderPath, typeOfT.FullName + ".deds");
         }
 
         #endregion

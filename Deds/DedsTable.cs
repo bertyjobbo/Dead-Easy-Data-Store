@@ -8,8 +8,14 @@ using System.Threading.Tasks;
 
 namespace Deds
 {
-    public class DedsTable
+    public class DedsTable: IEnumerable
     {
+        public IEnumerator GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
+        public DedsTableRowCollection InnerList { get; set; }
     }
 
     /// <summary>
@@ -18,10 +24,21 @@ namespace Deds
     /// <typeparam name="T"></typeparam>
     public class DedsTable<T> : DedsTable, IEnumerable<T>
     {
+        private DedsTableRowCollection<T> _innerList;
+
         #region INNER
 
         // internal
-        internal DedsTableRowCollection<T> InnerList { get; set; }
+        internal new DedsTableRowCollection<T> InnerList
+        {
+            get { return _innerList; }
+            set
+            {
+                base.InnerList = value;
+                _innerList = value;
+            }
+        }
+
         internal IEnumerable<T> InnerEnumerable { get { return InnerList.List.Select(x => x.Value); } }
 
         #endregion
@@ -42,32 +59,11 @@ namespace Deds
 
             try
             {
-
-                // pk val
-                object pkVal;
-
-                // find primary key
-                if (InnerList.TypeOfPrimaryKey == typeof (int))
-                {
-                    var max = InnerList.List.Count == 0 ? 0: InnerList.List.Max(x => ((int) x.PrimaryKeyValue));
-                    pkVal = max + 1;
-                    InnerList.PrimaryKeyPropertyInfo.SetValue(item, pkVal);
-                    
-                }
-                else
-                {
-                    pkVal = InnerList.PrimaryKeyPropertyInfo.GetValue(item);
-                    if (pkVal == null)
-                    {
-                        throw new Exception("Set primary key value, string or Guid");
-                    }
-                }
-
                 // add
                 InnerList.List.Add(new DedsTableRow<T>
                 {
-                    PrimaryKeyValue = pkVal,
-                    Value = item
+                    Value = item,
+                    Added = true
                 });
             }
             catch (Exception ex)
@@ -114,7 +110,9 @@ namespace Deds
         /// <returns></returns>
         public T Find(object primaryKeyValue)
         {
-            throw new NotImplementedException();
+            var found =  InnerList.List.FirstOrDefault(x => x.PrimaryKeyValue.Equals(primaryKeyValue));
+            if (found == null) return default (T);
+            return found.Value;
         }
 
         #endregion

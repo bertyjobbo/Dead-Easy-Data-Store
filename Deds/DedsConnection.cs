@@ -46,9 +46,25 @@ namespace Deds
         /// Save changes
         /// </summary>
         /// <returns></returns>
-        public DedsResponse SaveChanges()
+        public DedsResponse Commit()
         {
-            throw new NotImplementedException();
+            var output = new DedsResponse()
+            {
+                ResponseType = DedsResponseType.Commit
+            };
+            try
+            {
+                _ctx.Commit();
+            }
+            catch (Exception ex)
+            {
+                output.ErrorMessage = ex.Message +
+                                      (ex.InnerException == null
+                                          ? ""
+                                          : ". Inner Exception: " + ex.InnerException.Message);
+            }
+
+            return output;
         } 
 
         /// <summary>

@@ -13,15 +13,43 @@ namespace Deds.Harness
         {
             using (var deds = new DedsConnection())
             {
-                for (var i = 0; i < 10; i++)
+                var table = deds.Table<MyCustomType>();
+                foreach (var myCustomType in table)
                 {
-                    deds.Table<MyCustomType>().Create(new MyCustomType {Name = "Rob" + i, Date = DateTime.Now});
+                    Console.WriteLine(myCustomType.Id);
                 }
+                
+                // create new
+                var newOne = new MyCustomType
+                {
+                    Date = DateTime.Now, Name = "Test add"
+                };
 
-                foreach (var result in deds.Table<MyCustomType>()) 
-                {
-                    Console.WriteLine("{0} - {1}", result.Id, result.Name);
-                }
+                table.Create(newOne);
+                deds.Commit();
+                table = deds.Table<MyCustomType>();
+                var found = table.Find(table.Last().Id);
+                Console.WriteLine("Just added {0}", found.Date.ToString("F"));
+
+
+
+                //for (var i = 0; i < 10; i++)
+                //{
+                //    deds.Table<MyCustomType>().Create(new MyCustomType { Name = "Rob" + i, Date = DateTime.Now });
+                //}
+
+                //var res = deds.SaveChanges();
+                //if (!res.Success)
+                //{
+                //    Console.Write(res.ErrorMessage);
+                //}
+                //else
+                //{
+                //    foreach (var result in deds.Table<MyCustomType>())
+                //    {
+                //        Console.WriteLine("{0} - {1}", result.Id, result.Name);
+                //    }
+                //}
             }
 
             Console.ReadKey();
