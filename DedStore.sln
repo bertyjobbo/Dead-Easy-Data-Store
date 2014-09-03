@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DedStore.Benchmarking", "De
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DedStore", "DedStore\DedStore.csproj", "{D434DB1A-D530-40A2-A370-6E8C81CE68DA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DedStore.Tests", "DedStore.Tests\DedStore.Tests.csproj", "{81AE835B-B586-4B23-BF3E-6978955B9B61}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{D434DB1A-D530-40A2-A370-6E8C81CE68DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D434DB1A-D530-40A2-A370-6E8C81CE68DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D434DB1A-D530-40A2-A370-6E8C81CE68DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{81AE835B-B586-4B23-BF3E-6978955B9B61}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{81AE835B-B586-4B23-BF3E-6978955B9B61}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{81AE835B-B586-4B23-BF3E-6978955B9B61}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{81AE835B-B586-4B23-BF3E-6978955B9B61}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

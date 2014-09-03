@@ -34,6 +34,7 @@
       <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -44,6 +45,7 @@
   <ItemGroup>
     <Compile Include="DedsStoreTableRow.cs" />
     <Compile Include="DedsStoreTableRowCollection.cs" />
+    <Compile Include="DedStorePrimaryKeyAttribute.cs" />
     <Compile Include="DedStoreResponse.cs" />
     <Compile Include="DedStoreResponseType.cs" />
     <Compile Include="DedStoreContext.cs" />

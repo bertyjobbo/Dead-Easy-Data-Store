@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 
 namespace DedStore
 {
-    public enum DedStoreResponseType
+    public class DedStorePrimaryKeyAttribute:Attribute
     {
-        None = 0,
-        Add = 1,
-        Update = 2,
-        Delete = 3,
-        Commit = 4
     }
 }
