@@ -51,14 +51,14 @@ namespace DedStore
         public DedStoreTable<T> GetTable<T>()
         {
             var type = typeof(T);
-            var read = readTextToCollection(type);
+            var readCollection = readTextToCollection(type);
             if (!CollectionsInContext.ContainsKey(type))
             {
-                CollectionsInContext.Add(type, read);
+                CollectionsInContext.Add(type, readCollection);
             }
             else
             {
-                CollectionsInContext[type] = read;
+                CollectionsInContext[type] = readCollection;
             }
             var table = new DedStoreTable<T>(this);
             return table;
