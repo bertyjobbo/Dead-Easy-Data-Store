@@ -37,6 +37,11 @@ namespace DedStore
         public bool Added { get; set; }
 
         /// <summary>
+        /// Updated
+        /// </summary>
+        public bool Updated { get; set; }
+
+        /// <summary>
         /// Primary key
         /// </summary>
         public object PrimaryKey { get; set; }

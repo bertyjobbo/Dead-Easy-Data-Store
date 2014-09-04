@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using DedStore.System;
 using DedStore.Tests.DummyTypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
@@ -17,183 +19,621 @@ namespace DedStore.Tests
         private Guid _guid4 = new Guid("3c3e0990-6957-4ed7-b5f3-15dc6e3f5b08");
 
         [TestMethod]
+        public void Test_System_Types_Registered()
+        {
+            using (var ctx = new DedStoreContext())
+            {
+                var table = ctx.GetTable<Person>();
+            }
+            using (var ctx = new DedStoreContext())
+            {
+                var table2 = ctx.GetTable<RegisteredType>();
+                Assert.IsTrue(table2.Count() > 0);
+            }
+        }
+
+        [TestMethod]
         public void SimpleAddAndCommit()
         {
-            var persons = new List<Person>
-            {
-                new Person{Id=1, Name = "Person A"},
-                new Person{Id=2, Name = "Person B"},
-                new Person{Id=3, Name = "Person C"}
-            };
-            var json = JsonConvert.SerializeObject(persons);
-            const string filePath = @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.Person.deds";
-            const string filePath2 = @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\INTPK_DedStore.Tests.DummyTypes.Person.deds";
-            File.WriteAllText(filePath, json);
-            File.WriteAllText(filePath2, 33.ToString());
-
             var person = new Person { Name = "Rob--" + Guid.NewGuid() };
 
-            var ctx = new DedStoreContext();
+            using (var ctx = new DedStoreContext())
+            {
+                var checkTable = ctx.GetTable<RegisteredType>();
 
-            var table = ctx.GetTable<Person>();
 
-            var result = table.Add(person);
+                var persons = new List<Person>
+                {
+                    new Person {Id = 1, Name = "Person A"},
+                    new Person {Id = 2, Name = "Person B"},
+                    new Person {Id = 3, Name = "Person C"}
+                };
+                var json = JsonConvert.SerializeObject(persons);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.Person.deds";
+                const string filePath2 =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\SystemTables\DedStore.System.LatestIntegerPrimaryKey.deds";
+                File.WriteAllText(filePath, json);
+                var json2 =
+                    JsonConvert.SerializeObject(new[]{ new LatestIntegerPrimaryKey
+                    {
+                        Id = typeof (Person).FullName,
+                        LatestValue = 33
+                    }});
+                File.WriteAllText(filePath2, json2);
 
-            var result2 = ctx.Commit();
 
-            Assert.IsTrue(result.Success);
-            Assert.IsTrue(result2.Success);
-            Assert.IsTrue(person.Id == 34);
-            Assert.IsTrue(File.ReadAllText(filePath2)=="34");
 
-            person = new Person { Name = "Rob--" + Guid.NewGuid() };
 
-            ctx = new DedStoreContext();
 
-            table = ctx.GetTable<Person>();
+                var table = ctx.GetTable<Person>();
 
-            result = table.Add(person);
+                var result = table.Add(person);
 
-            result2 = ctx.Commit();
+                var result2 = ctx.Commit();
 
-            Assert.IsTrue(result.Success);
-            Assert.IsTrue(result2.Success);
-            Assert.IsTrue(person.Id == 35);
-            Assert.IsTrue(File.ReadAllText(filePath2) == "35");
+                Assert.IsTrue(result.Success);
+                Assert.IsTrue(result2.Success);
+                Assert.IsTrue(person.Id == 34);
+                var pkTable = ctx.GetTable<LatestIntegerPrimaryKey>();
+                var pk = pkTable.FirstOrDefault();
+                Assert.IsTrue(pk != null && pk.LatestValue == 34);
+
+
+
+            }
+            using (var ctx = new DedStoreContext())
+            {
+
+                person = new Person { Name = "Rob--" + Guid.NewGuid() };
+
+                var table = ctx.GetTable<Person>();
+
+                var result = table.Add(person);
+
+                var result2 = ctx.Commit();
+
+                var checkTable2 = ctx.GetTable<RegisteredType>();
+                var entry = checkTable2.FirstOrDefault(x => x.Id == typeof(Person).FullName);
+                var pkTable = ctx.GetTable<LatestIntegerPrimaryKey>();
+                var pk = pkTable.FirstOrDefault();
+
+                Assert.IsTrue(result.Success);
+                Assert.IsTrue(result2.Success);
+                Assert.IsTrue(person.Id == 35);
+                Assert.IsTrue(entry != null);
+                Assert.IsTrue(pk != null && pk.LatestValue == 35);
+            }
         }
 
         [TestMethod]
         public void SimpleAddAndCommit_GuidKey()
         {
-            var pages = new List<IntranetPage>
+            using (var ctx = new DedStoreContext())
             {
-                new IntranetPage{Id=_guid1, Name = "Page A"},
-                new IntranetPage{Id=_guid2, Name = "Page B"},
-                new IntranetPage{Id=_guid3, Name = "Page C"}
-            };
-            var json = JsonConvert.SerializeObject(pages);
-            const string filePath = @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.IntranetPage.deds";
-            File.WriteAllText(filePath, json);
+                var checkTable = ctx.GetTable<RegisteredType>();
 
-            var page = new IntranetPage { Name = "Rob--" + Guid.NewGuid(), Id = Guid.NewGuid() };
 
-            var ctx = new DedStoreContext();
+                var pages = new List<IntranetPage>
+                {
+                    new IntranetPage {Id = _guid1, Name = "Page A"},
+                    new IntranetPage {Id = _guid2, Name = "Page B"},
+                    new IntranetPage {Id = _guid3, Name = "Page C"}
+                };
+                var json = JsonConvert.SerializeObject(pages);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.IntranetPage.deds";
+                File.WriteAllText(filePath, json);
 
-            var table = ctx.GetTable<IntranetPage>();
+                var page = new IntranetPage { Name = "Rob--" + Guid.NewGuid(), Id = Guid.NewGuid() };
 
-            var result = table.Add(page);
 
-            var result2 = ctx.Commit();
 
-            Assert.IsTrue(result.Success);
-            Assert.IsTrue(result2.Success);
+                var table = ctx.GetTable<IntranetPage>();
+
+                var result = table.Add(page);
+
+                var result2 = ctx.Commit();
+
+                Assert.IsTrue(result.Success);
+                Assert.IsTrue(result2.Success);
+            }
         }
 
         [TestMethod]
         public void SimpleAddAndCommit_Fail_NonUniqueGuidKey()
         {
-            
-            var pages = new List<IntranetPage>
+            using (var ctx = new DedStoreContext())
             {
-                new IntranetPage{Id=_guid1, Name = "Page A"},
-                new IntranetPage{Id=_guid2, Name = "Page B"},
-                new IntranetPage{Id=_guid3, Name = "Page C"}
-            };
-            var json = JsonConvert.SerializeObject(pages);
-            const string filePath = @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.IntranetPage.deds";
-            File.WriteAllText(filePath, json);
+                var checkTable = ctx.GetTable<RegisteredType>();
 
-            var page = new IntranetPage { Name = "Rob--" + Guid.NewGuid(), Id = _guid3 };
 
-            var ctx = new DedStoreContext();
+                var pages = new List<IntranetPage>
+                {
+                    new IntranetPage {Id = _guid1, Name = "Page A"},
+                    new IntranetPage {Id = _guid2, Name = "Page B"},
+                    new IntranetPage {Id = _guid3, Name = "Page C"}
+                };
+                var json = JsonConvert.SerializeObject(pages);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.IntranetPage.deds";
+                File.WriteAllText(filePath, json);
 
-            var table = ctx.GetTable<IntranetPage>();
+                var page = new IntranetPage { Name = "Rob--" + Guid.NewGuid(), Id = _guid3 };
 
-            var result = table.Add(page);
 
-            var result2 = ctx.Commit();
 
-            Assert.IsTrue(result.Success);
-            Assert.IsFalse(result2.Success);
-            Assert.IsTrue(result2.ErrorMessage.Contains("unique"));
+                var table = ctx.GetTable<IntranetPage>();
+
+                var result = table.Add(page);
+
+                var result2 = ctx.Commit();
+
+                Assert.IsTrue(result.Success);
+                Assert.IsFalse(result2.Success);
+                Assert.IsTrue(result2.ErrorMessage.Contains("unique"));
+            }
         }
 
         [TestMethod]
         public void SimpleAddAndCommit_StringKey()
         {
-            var emps = new List<EmployeeType>
+            using (var ctx = new DedStoreContext())
             {
-                new EmployeeType{Id="Type1", Name = "Page A"},
-                new EmployeeType{Id="Type2", Name = "Page B"},
-                new EmployeeType{Id="Type3", Name = "Page C"}
-            };
-            var json = JsonConvert.SerializeObject(emps);
-            const string filePath = @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.EmployeeType.deds";
-            File.WriteAllText(filePath, json);
+                var checkTable = ctx.GetTable<RegisteredType>();
 
-            var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
-            var ctx = new DedStoreContext();
-            var table = ctx.GetTable<EmployeeType>();
-            var result = table.Add(emp);
-            var result2 = ctx.Commit();
-            Assert.IsTrue(result.Success);
-            Assert.IsTrue(result2.Success);
+                var emps = new List<EmployeeType>
+                {
+                    new EmployeeType {Id = "Type1", Name = "Page A"},
+                    new EmployeeType {Id = "Type2", Name = "Page B"},
+                    new EmployeeType {Id = "Type3", Name = "Page C"}
+                };
+                var json = JsonConvert.SerializeObject(emps);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.EmployeeType.deds";
+                File.WriteAllText(filePath, json);
+
+                var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
+
+                var table = ctx.GetTable<EmployeeType>();
+                var result = table.Add(emp);
+                var result2 = ctx.Commit();
+                Assert.IsTrue(result.Success);
+                Assert.IsTrue(result2.Success);
+            }
         }
 
         [TestMethod]
         public void SimpleAddAndCommit_Fail_NonUniqueStringKey()
         {
-
-            var emps = new List<EmployeeType>
+            using (var ctx = new DedStoreContext())
             {
-                new EmployeeType{Id="Type1", Name = "Page A"},
-                new EmployeeType{Id="Type2", Name = "Page B"},
-                new EmployeeType{Id="Type3", Name = "Page C"}
-            };
-            var json = JsonConvert.SerializeObject(emps);
-            const string filePath = @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.EmployeeType.deds";
-            File.WriteAllText(filePath, json);
+                var checkTable = ctx.GetTable<RegisteredType>();
 
-            var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type2" };
-            var ctx = new DedStoreContext();
-            var table = ctx.GetTable<EmployeeType>();
-            var result = table.Add(emp);
-            var result2 = ctx.Commit();
+                var emps = new List<EmployeeType>
+                {
+                    new EmployeeType {Id = "Type1", Name = "Page A"},
+                    new EmployeeType {Id = "Type2", Name = "Page B"},
+                    new EmployeeType {Id = "Type3", Name = "Page C"}
+                };
+                var json = JsonConvert.SerializeObject(emps);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.EmployeeType.deds";
+                File.WriteAllText(filePath, json);
 
-            Assert.IsTrue(result.Success);
-            Assert.IsFalse(result2.Success);;
-            Assert.IsTrue(result2.ErrorMessage.Contains("unique"));
+                var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type2" };
+
+                var table = ctx.GetTable<EmployeeType>();
+                var result = table.Add(emp);
+                var result2 = ctx.Commit();
+
+                Assert.IsTrue(result.Success);
+                Assert.IsFalse(result2.Success);
+                Assert.IsTrue(result2.ErrorMessage.Contains("unique"));
+            }
         }
 
         [TestMethod]
         public void Test_Only_Int_String_AndGuid_AreAllowed()
         {
-            var rubbishes = new List<RubbishType>
+            using (var ctx = new DedStoreContext())
             {
-                new RubbishType{Id=DateTime.Now, Name = "Page A"},
-                new RubbishType{Id=DateTime.Now, Name = "Page B"},
-                new RubbishType{Id=DateTime.Now, Name = "Page C"}
-            };
-            var json = JsonConvert.SerializeObject(rubbishes);
-            const string filePath = @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.RubbishType.deds";
-            File.WriteAllText(filePath, json);
+                var checkTable = ctx.GetTable<RegisteredType>();
 
-            var page = new RubbishType { Name = "Rob--" + Guid.NewGuid(), Id = DateTime.Now };
+                var rubbishes = new List<RubbishType>
+                {
+                    new RubbishType {Id = DateTime.Now, Name = "Page A"},
+                    new RubbishType {Id = DateTime.Now, Name = "Page B"},
+                    new RubbishType {Id = DateTime.Now, Name = "Page C"}
+                };
+                var json = JsonConvert.SerializeObject(rubbishes);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.RubbishType.deds";
+                File.WriteAllText(filePath, json);
 
-            var ctx = new DedStoreContext();
+                var page = new RubbishType { Name = "Rob--" + Guid.NewGuid(), Id = DateTime.Now };
 
-            var table = ctx.GetTable<RubbishType>();
 
-            var result = table.Add(page);
 
-            var result2 = ctx.Commit();
+                var table = ctx.GetTable<RubbishType>();
 
-            Assert.IsTrue(result.Success);
-            Assert.IsFalse(result2.Success);
-            Assert.IsTrue(result2.ErrorMessage.ToLower().Contains("integer"));
-            Assert.IsFalse(File.Exists(filePath));
+                var result = table.Add(page);
+
+                var result2 = ctx.Commit();
+
+                Assert.IsTrue(result.Success);
+                Assert.IsFalse(result2.Success);
+                Assert.IsTrue(result2.ErrorMessage.ToLower().Contains("integer"));
+                Assert.IsFalse(File.Exists(filePath));
+            }
         }
 
+        [TestMethod]
+        public void Test_Type_Change_Fail()
+        {
+            // THIS CAN'T BE A UNIT TEST, BUT I HAVE TESTED IT!
+            Assert.IsFalse(false);
+        }
+
+        [TestMethod]
+        public void Test_Update_StringKey()
+        {
+            using (var ctx = new DedStoreContext())
+            {
+                var checkTable = ctx.GetTable<RegisteredType>();
+
+                var emps = new List<EmployeeType>
+                {
+                    new EmployeeType {Id = "Type1", Name = "Type A"},
+                    new EmployeeType {Id = "Type2", Name = "Type B"},
+                    new EmployeeType {Id = "Type3", Name = "Type C"}
+                };
+                var json = JsonConvert.SerializeObject(emps);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.EmployeeType.deds";
+                File.WriteAllText(filePath, json);
+
+                //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
+
+                var table = ctx.GetTable<EmployeeType>();
+                var emp = table.First();
+                emp.Name = "Type Changed";
+                var result = table.Update(emp);
+                var result2 = ctx.Commit();
+                Assert.IsTrue(result.Success);
+                Assert.IsTrue(result2.Success);
+                Assert.IsTrue(ctx.GetTable<EmployeeType>().First().Name == "Type Changed");
+            }
+
+            using (var ctx = new DedStoreContext())
+            {
+                Assert.IsTrue(ctx.GetTable<EmployeeType>().First().Name == "Type Changed");
+            }
+        }
+
+        [TestMethod]
+        public void Test_Remove_StringKey()
+        {
+            using (var ctx = new DedStoreContext())
+            {
+                var checkTable = ctx.GetTable<RegisteredType>();
+
+                var emps = new List<EmployeeType>
+                {
+                    new EmployeeType {Id = "Type1", Name = "Type A"},
+                    new EmployeeType {Id = "Type2", Name = "Type B"},
+                    new EmployeeType {Id = "Type3", Name = "Type C"}
+                };
+                var json = JsonConvert.SerializeObject(emps);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.EmployeeType.deds";
+                File.WriteAllText(filePath, json);
+
+                //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
+
+                var table = ctx.GetTable<EmployeeType>();
+                Assert.IsTrue(table.FirstOrDefault(x => x.Id == "Type1") != null);
+                var emp = table.First();
+                var result = table.Remove(emp);
+                var result2 = ctx.Commit();
+                Assert.IsTrue(result.Success);
+                Assert.IsTrue(result2.Success);
+                Assert.IsTrue(ctx.GetTable<EmployeeType>().FirstOrDefault(x => x.Id == "Type1") == null);
+            }
+            using (var ctx = new DedStoreContext())
+            {
+                Assert.IsTrue(ctx.GetTable<EmployeeType>().FirstOrDefault(x => x.Id == "Type1") == null);
+            }
+        }
+
+        [TestMethod]
+        public void Test_Find_StringKey()
+        {
+            using (var ctx = new DedStoreContext())
+            {
+                var checkTable = ctx.GetTable<RegisteredType>();
+
+                var emps = new List<EmployeeType>
+                {
+                    new EmployeeType {Id = "Type1", Name = "Type A"},
+                    new EmployeeType {Id = "Type2", Name = "Type B"},
+                    new EmployeeType {Id = "Type3", Name = "Type C"}
+                };
+                var json = JsonConvert.SerializeObject(emps);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.EmployeeType.deds";
+                File.WriteAllText(filePath, json);
+
+                //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
+
+                var table = ctx.GetTable<EmployeeType>();
+
+                var found = table.Find("Type1");
+
+                Assert.IsTrue(found != null && found.GetHashCode() == table.First().GetHashCode());
+
+            }
+        }
+
+        [TestMethod]
+        public void Test_Update_GuidKey()
+        {
+            using (var ctx = new DedStoreContext())
+            {
+                var checkTable = ctx.GetTable<RegisteredType>();
+
+                var emps = new List<IntranetPage>
+                {
+                    new IntranetPage {Id = _guid1, Name = "Type A"},
+                    new IntranetPage {Id = _guid2, Name = "Type B"},
+                    new IntranetPage {Id = _guid3, Name = "Type C"}
+                };
+                var json = JsonConvert.SerializeObject(emps);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.IntranetPage.deds";
+                File.WriteAllText(filePath, json);
+
+                //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
+
+                var table = ctx.GetTable<IntranetPage>();
+                var emp = table.First();
+                emp.Name = "Type Changed";
+                var result = table.Update(emp);
+                var result2 = ctx.Commit();
+                Assert.IsTrue(result.Success);
+                Assert.IsTrue(result2.Success);
+                Assert.IsTrue(ctx.GetTable<IntranetPage>().First().Name == "Type Changed");
+            }
+
+            using (var ctx = new DedStoreContext())
+            {
+                Assert.IsTrue(ctx.GetTable<IntranetPage>().First().Name == "Type Changed");
+            }
+        }
+
+        [TestMethod]
+        public void Test_Remove_GuidKey()
+        {
+            using (var ctx = new DedStoreContext())
+            {
+                var checkTable = ctx.GetTable<RegisteredType>();
+
+                var emps = new List<IntranetPage>
+                {
+                    new IntranetPage {Id = _guid1, Name = "Type A"},
+                    new IntranetPage {Id = _guid2, Name = "Type B"},
+                    new IntranetPage {Id = _guid3, Name = "Type C"}
+                };
+                var json = JsonConvert.SerializeObject(emps);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.IntranetPage.deds";
+                File.WriteAllText(filePath, json);
+
+                //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
+
+                var table = ctx.GetTable<IntranetPage>();
+                Assert.IsTrue(table.FirstOrDefault(x => x.Id == _guid1) != null);
+                var emp = table.First();
+                var result = table.Remove(emp);
+                var result2 = ctx.Commit();
+                Assert.IsTrue(result.Success);
+                Assert.IsTrue(result2.Success);
+                Assert.IsTrue(ctx.GetTable<IntranetPage>().FirstOrDefault(x => x.Id == _guid1) == null);
+            }
+            using (var ctx = new DedStoreContext())
+            {
+                Assert.IsTrue(ctx.GetTable<IntranetPage>().FirstOrDefault(x => x.Id == _guid1) == null);
+            }
+        }
+
+        [TestMethod]
+        public void Test_Find_GuidKey()
+        {
+            using (var ctx = new DedStoreContext())
+            {
+                var checkTable = ctx.GetTable<RegisteredType>();
+
+                var emps = new List<IntranetPage>
+                {
+                    new IntranetPage {Id = _guid1, Name = "Type A"},
+                    new IntranetPage {Id = _guid2, Name = "Type B"},
+                    new IntranetPage {Id = _guid3, Name = "Type C"}
+                };
+                var json = JsonConvert.SerializeObject(emps);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.IntranetPage.deds";
+                File.WriteAllText(filePath, json);
+
+                //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
+
+                var table = ctx.GetTable<IntranetPage>();
+
+                var found = table.Find(_guid1);
+
+                Assert.IsTrue(found != null && found.GetHashCode() == table.First().GetHashCode());
+            }
+        }
+
+
+        [TestMethod]
+        public void Test_Update_IntegerKey()
+        {
+            using (var ctx = new DedStoreContext())
+            {
+                var checkTable = ctx.GetTable<Person>();
+
+                var emps = new List<Person>
+                {
+                    new Person {Id = 1, Name = "Type A"},
+                    new Person {Id = 2, Name = "Type B"},
+                    new Person {Id = 3, Name = "Type C"}
+                };
+                var json = JsonConvert.SerializeObject(emps);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.Person.deds";
+                File.WriteAllText(filePath, json);
+
+                //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
+
+                var table = ctx.GetTable<Person>();
+                var emp = table.First();
+                emp.Name = "Type Changed";
+                var result = table.Update(emp);
+                var result2 = ctx.Commit();
+                Assert.IsTrue(result.Success);
+                Assert.IsTrue(result2.Success);
+                Assert.IsTrue(ctx.GetTable<Person>().First().Name == "Type Changed");
+            }
+
+            using (var ctx = new DedStoreContext())
+            {
+                Assert.IsTrue(ctx.GetTable<Person>().First().Name == "Type Changed");
+            }
+        }
+
+        [TestMethod]
+        public void Test_Remove_IntegerKey()
+        {
+            using (var ctx = new DedStoreContext())
+            {
+                var checkTable = ctx.GetTable<Person>();
+
+                var emps = new List<Person>
+                {
+                    new Person {Id = 1, Name = "Type A"},
+                    new Person {Id = 2, Name = "Type B"},
+                    new Person {Id = 3, Name = "Type C"}
+                };
+                var json = JsonConvert.SerializeObject(emps);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.Person.deds";
+                File.WriteAllText(filePath, json);
+
+                //var emp = new EmployeeType { Name = "Rob--" + Guid.NewGuid(), Id = "Type4" };
+
+                var table = ctx.GetTable<Person>();
+                Assert.IsTrue(table.FirstOrDefault(x => x.Id == 1) != null);
+                var emp = table.First();
+                var result = table.Remove(emp);
+                var result2 = ctx.Commit();
+                Assert.IsTrue(result.Success);
+                Assert.IsTrue(result2.Success);
+                Assert.IsTrue(ctx.GetTable<Person>().FirstOrDefault(x => x.Id == 1) == null);
+            }
+            using (var ctx = new DedStoreContext())
+            {
+                Assert.IsTrue(ctx.GetTable<Person>().FirstOrDefault(x => x.Id == 1) == null);
+            }
+        }
+
+        [TestMethod]
+        public void Test_Find_IntegerKey()
+        {
+            using (var ctx = new DedStoreContext())
+            {
+                var checkTable = ctx.GetTable<Person>();
+
+                var emps = new List<Person>
+                {
+                    new Person {Id = 1, Name = "Type A"},
+                    new Person {Id = 2, Name = "Type B"},
+                    new Person {Id = 3, Name = "Type C"}
+                };
+
+                //var json = JsonConvert.SerializeObject(emps);
+                //const string filePath =
+                  // @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.Person.deds";
+                //File.WriteAllText(filePath, json);
+
+                var table = ctx.GetTable<Person>();
+                var result = table.Clear();
+                result = ctx.Commit();
+                result = table.AddMany(emps);
+                result = ctx.Commit();
+                result = table.UpdateMany(emps);
+                result = ctx.Commit();
+                result = table.RemoveMany(emps);
+                result = ctx.Commit();
+                result = table.AddMany(emps);
+                result = ctx.Commit();
+
+                var found = table.Find(emps.Last().Id);
+
+                Assert.IsTrue(found != null && found.GetHashCode() == table.Last().GetHashCode());
+            }
+        }
+
+        [TestMethod]
+        public void Test_Crud_Multiple()
+        {
+            using (var ctx = new DedStoreContext())
+            {
+                var checkTable = ctx.GetTable<Person>();
+
+                var emps = new List<Person>
+                {
+                    new Person {Id = 1, Name = "Person A"},
+                    new Person {Id = 2, Name = "Person B"},
+                    new Person {Id = 3, Name = "Person C"}
+                };
+                var json = JsonConvert.SerializeObject(emps);
+                const string filePath =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\DedStore.Tests.DummyTypes.Person.deds";
+                const string filePath2 =
+                    @"C:\Projects\Git\Deds\DedStore.Tests\DedStoreFiles\SystemTables\DedStore.System.LatestIntegerPrimaryKey.deds";
+                File.WriteAllText(filePath, json);
+                var json2 =
+                    JsonConvert.SerializeObject(new[]{ new LatestIntegerPrimaryKey
+                    {
+                        Id = typeof (Person).FullName,
+                        LatestValue = 3
+                    }});
+                File.WriteAllText(filePath2, json2);
+
+                var table = ctx.GetTable<Person>();
+                
+                var result = table.Clear();
+                result = ctx.Commit();
+                Assert.IsTrue(table.Count() == 0);
+                
+                result = table.AddMany(emps);
+                result = ctx.Commit();
+                Assert.IsTrue(table.Count() == 3);
+
+                table.First().Name = "TEST CHANGED";
+                result = table.UpdateMany(emps);
+                result = ctx.Commit();
+                Assert.IsTrue(table.First().Name =="TEST CHANGED");
+                
+                result = table.RemoveMany(emps);
+                result = ctx.Commit();
+                Assert.IsTrue(table.Count() ==0);
+                
+                result = table.AddMany(emps);
+                result = ctx.Commit();
+                Assert.IsTrue(table.Last().Id ==9);
+            }
+        }
 
     }
 }

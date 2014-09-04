@@ -50,9 +50,10 @@
     <Compile Include="DedStoreResponseType.cs" />
     <Compile Include="DedStoreContext.cs" />
     <Compile Include="DedStoreTable.cs" />
-    <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="FileHelper.cs" />
+    <Compile Include="System\FileHelper.cs" />
+    <Compile Include="System\LatestIntegerPrimaryKey.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="System\RegisteredType.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
