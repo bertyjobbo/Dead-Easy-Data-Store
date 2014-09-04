@@ -50,15 +50,15 @@ namespace DedStore
         /// <returns></returns>
         public DedStoreTable<T> GetTable<T>()
         {
-            var type = typeof(T);
-            var readCollection = readTextToCollection(type);
-            if (!CollectionsInContext.ContainsKey(type))
+            var typeOfTable = typeof(T);
+            var readCollection = readTextToCollection(typeOfTable);
+            if (!CollectionsInContext.ContainsKey(typeOfTable))
             {
-                CollectionsInContext.Add(type, readCollection);
+                CollectionsInContext.Add(typeOfTable, readCollection);
             }
             else
             {
-                CollectionsInContext[type] = readCollection;
+                CollectionsInContext[typeOfTable] = readCollection;
             }
             var table = new DedStoreTable<T>(this);
             return table;

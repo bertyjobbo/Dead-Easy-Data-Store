@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace DedStore.System
+﻿namespace DedStore.System
 {
     public class RegisteredType
     {

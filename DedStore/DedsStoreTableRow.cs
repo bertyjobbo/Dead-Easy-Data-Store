@@ -50,44 +50,19 @@ namespace DedStore
         /// Get primary key
         /// </summary>
         /// <returns></returns>
-        internal void SetPrimaryKeyFromRawItem(PropertyInfo prop)
+        internal void SetPrimaryKeyFromRawItem(PropertyInfo property)
         {
-            PrimaryKey = prop.GetValue(RawItem);
+            PrimaryKey = property.GetValue(RawItem);
         }
 
         /// <summary>
         /// Set pk
         /// </summary>
         /// <param name="pk"></param>
-        /// <param name="prop"></param>
-        internal void SetRawItemPrimaryKey(object pk, PropertyInfo prop)
+        /// <param name="property"></param>
+        internal void SetRawItemPrimaryKey(object pk, PropertyInfo property)
         {
-            prop.SetValue(RawItem,pk);
+            property.SetValue(RawItem,pk);
         }
     }
-
-    ///// <summary>
-    ///// Table row
-    ///// </summary>
-    //public class DedsStoreTableRow<T>
-    //{
-    //    /// <summary>
-    //    /// Constructor
-    //    /// </summary>
-    //    /// <param name="parent"></param>
-    //    public DedsStoreTableRow(DedsStoreTableRow parent)
-    //    {
-    //        ParentItem = parent;
-    //    }
-
-    //    /// <summary>
-    //    /// Raw item
-    //    /// </summary>
-    //    public T RawItem { get { return (T) ParentItem.RawItem; } }
-
-    //    /// <summary>
-    //    /// Parent item
-    //    /// </summary>
-    //    public DedsStoreTableRow ParentItem { get; private set; }
-    //}
 }

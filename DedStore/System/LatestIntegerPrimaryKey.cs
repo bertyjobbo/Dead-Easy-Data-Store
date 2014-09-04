@@ -1,4 +1,5 @@
-﻿namespace DedStore.System
+﻿using System;
+namespace DedStore.System
 {
     public class LatestIntegerPrimaryKey
     {

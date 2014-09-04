@@ -71,8 +71,9 @@
       <Name>DedStore</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="DedStoreFiles\" />
+    <Content Include="DedStoreFiles\TextFile1.txt" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">

@@ -32,10 +32,10 @@ namespace DedStore.System
             lock (_syncLock)
             {
                 // get path
-                var path = GetTablePath(type);
+                var filePath = GetTablePath(type);
 
                 // filestream
-                using (var fileStream = new FileStream(path, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                using (var fileStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.ReadWrite))
                 {
                     // output
                     var output = string.Empty;

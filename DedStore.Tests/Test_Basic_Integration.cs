@@ -36,7 +36,7 @@ namespace DedStore.Tests
         {
             using (var ctx = new DedStoreContext())
             {
-                var table = ctx.GetTable<Person>();
+                var thetable = ctx.GetTable<Person>();
             }
             using (var ctx = new DedStoreContext())
             {
