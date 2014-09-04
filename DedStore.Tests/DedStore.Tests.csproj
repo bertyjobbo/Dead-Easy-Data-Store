@@ -60,6 +60,7 @@
     <Compile Include="DummyTypes\RubbishType.cs" />
     <Compile Include="Test_Basic_Integration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Test_Async_Integration.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

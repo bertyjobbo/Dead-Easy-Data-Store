@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using DedStore.System;
 using Newtonsoft.Json;
 
@@ -406,5 +407,27 @@ namespace DedStore
         }
 
         #endregion
+
+#region ASYNC
+
+        /// <summary>
+        /// Async commit
+        /// </summary>
+        /// <returns></returns>
+        public async Task<DedStoreResponse> CommitAsync()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Async commit
+        /// </summary>
+        /// <returns></returns>
+        public async Task<DedStoreTable<T>> GetTableAsync<T>()
+        {
+            throw new NotImplementedException();
+        }
+
+#endregion
     }
 }
