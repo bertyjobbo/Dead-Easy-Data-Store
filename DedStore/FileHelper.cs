@@ -45,10 +45,11 @@ namespace DedStore
         /// Get path for type
         /// </summary>
         /// <param name="typeOfT"></param>
+        /// <param name="prefix"></param>
         /// <returns></returns>
-        private static string getPathForType(Type typeOfT)
+        private static string getPathForType(Type typeOfT, string prefix = "")
         {
-            return Path.Combine(FolderPath, typeOfT.FullName + ".deds");
+            return Path.Combine(FolderPath, prefix + typeOfT.FullName + ".deds");
         }
 
         /// <summary>
@@ -60,6 +61,21 @@ namespace DedStore
         {
             var filePath = getPathForType(type);
             File.WriteAllText(filePath,finalJson);
+        }
+
+        internal static string GetTablePath(Type type)
+        {
+            return getPathForType(type);
+        }
+
+        internal static string GetGuidOrStringPath(Type type)
+        {
+            return getPathForType(type, "NONINTPK_");
+        }
+
+        internal static string GetIntegerPath(Type type)
+        {
+            return getPathForType(type, "INTPK_");
         }
     }
 }

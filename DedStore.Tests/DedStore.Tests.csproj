@@ -54,7 +54,10 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="DummyTypes\EmployeeType.cs" />
+    <Compile Include="DummyTypes\IntranetPage.cs" />
     <Compile Include="DummyTypes\Person.cs" />
+    <Compile Include="DummyTypes\RubbishType.cs" />
     <Compile Include="Test_Basic_Integration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
