@@ -56,11 +56,17 @@
   <ItemGroup>
     <Compile Include="DummyTypes\EmployeeType.cs" />
     <Compile Include="DummyTypes\IntranetPage.cs" />
+    <Compile Include="DummyTypes\KeysAndAllThat\Achievement.cs" />
+    <Compile Include="DummyTypes\KeysAndAllThat\Department.cs" />
+    <Compile Include="DummyTypes\KeysAndAllThat\Employee.cs" />
+    <Compile Include="DummyTypes\KeysAndAllThat\EmployeeOffice.cs" />
+    <Compile Include="DummyTypes\KeysAndAllThat\Office.cs" />
     <Compile Include="DummyTypes\Person.cs" />
     <Compile Include="DummyTypes\RubbishType.cs" />
     <Compile Include="Test_Basic_Integration.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Test_Async_Integration.cs" />
+    <Compile Include="Test_Keys_And_All_That.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

@@ -1,4 +1,6 @@
 ﻿using System;
+using DedStore.Attributes;
+
 namespace DedStore.System
 {
     public class LatestIntegerPrimaryKey

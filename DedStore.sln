@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DedStore.Benchmarking", "DedStore.Benchmarking\DedStore.Benchmarking.csproj", "{280CE323-6DC0-4C1B-A293-DEA6D9A7AFDC}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DedStore", "DedStore\DedStore.csproj", "{D434DB1A-D530-40A2-A370-6E8C81CE68DA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DedStore.Tests", "DedStore.Tests\DedStore.Tests.csproj", "{81AE835B-B586-4B23-BF3E-6978955B9B61}"

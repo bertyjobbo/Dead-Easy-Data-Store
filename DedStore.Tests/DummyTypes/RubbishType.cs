@@ -1,4 +1,5 @@
 ﻿using System;
+using DedStore.Attributes;
 
 namespace DedStore.Tests.DummyTypes
 {

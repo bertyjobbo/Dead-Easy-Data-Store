@@ -278,7 +278,7 @@ namespace DedStore.Tests
                 Assert.IsTrue(result.Success);
                 Assert.IsFalse(result2.Success);
                 Assert.IsTrue(result2.ErrorMessage.ToLower().Contains("integer"));
-                Assert.IsFalse(File.Exists(filePath));
+                //Assert.IsFalse(File.Exists(filePath));//no longer deleting file
             }
         }
 

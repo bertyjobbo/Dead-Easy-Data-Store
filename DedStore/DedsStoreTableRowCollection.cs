@@ -49,6 +49,21 @@ namespace DedStore
         }
 
         /// <summary>
+        /// One-ones
+        /// </summary>
+        public IList<PropertyInfo> OneToOneProperties { get; set; }
+
+        /// <summary>
+        /// One-manys
+        /// </summary>
+        public IList<PropertyInfo> OneToManyProperties { get; set; }
+
+        /// <summary>
+        /// Many-manys
+        /// </summary>
+        public IList<PropertyInfo> ManyToManyProperties { get; set; }
+
+        /// <summary>
         /// Items to update
         /// </summary>
         public IList<DedsStoreTableRow> ItemsToAdd { get; set; }

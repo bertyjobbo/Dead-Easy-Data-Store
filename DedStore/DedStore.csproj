@@ -44,9 +44,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Attributes\DedStoreManyToManyAttribute.cs" />
+    <Compile Include="Attributes\DedStoreOneToManyAttribute.cs" />
+    <Compile Include="Attributes\DedStoreOneToOneAttribute.cs" />
     <Compile Include="DedsStoreTableRow.cs" />
     <Compile Include="DedsStoreTableRowCollection.cs" />
-    <Compile Include="DedStorePrimaryKeyAttribute.cs" />
+    <Compile Include="Attributes\DedStorePrimaryKeyAttribute.cs" />
     <Compile Include="DedStoreResponse.cs" />
     <Compile Include="DedStoreResponseType.cs" />
     <Compile Include="DedStoreContext.cs" />

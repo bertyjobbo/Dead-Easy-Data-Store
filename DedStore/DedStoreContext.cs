@@ -3,12 +3,14 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Odbc;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using DedStore.Attributes;
 using DedStore.System;
 using Newtonsoft.Json;
 
@@ -52,6 +54,18 @@ namespace DedStore
         public DedStoreTable<T> GetTable<T>()
         {
             var typeOfTable = typeof(T);
+            GetTable(typeOfTable);
+            var table = new DedStoreTable<T>(this);
+            return table;
+        }
+
+        /// <summary>
+        /// Get table (ish)
+        /// </summary>
+        /// <param name="typeOfTable"></param>
+        /// <returns></returns>
+        internal DedStoreTableRowCollection GetTable(Type typeOfTable)
+        {
             var readCollection = readTextToCollection(typeOfTable);
             if (!CollectionsInContext.ContainsKey(typeOfTable))
             {
@@ -61,8 +75,7 @@ namespace DedStore
             {
                 CollectionsInContext[typeOfTable] = readCollection;
             }
-            var table = new DedStoreTable<T>(this);
-            return table;
+            return CollectionsInContext[typeOfTable];
         }
 
         /// <summary>
@@ -104,7 +117,7 @@ namespace DedStore
             if (typeOfPk == typeof(int) || typeOfPk == typeof(string) || typeOfPk == typeof(Guid))
                 return;
 
-            File.Delete(FileHelper.Current.GetTablePath(type));
+            //File.Delete(FileHelper.Current.GetTablePath(type));
             throw new Exception("Primary key must be Integer, Guid or String");
 
         }
@@ -276,7 +289,7 @@ namespace DedStore
 
                             // get again
                             CollectionsInContext[collection.Key] = readTextToCollection(collection.Key);
-                            
+
                         }
                     }
                     catch (Exception ex)
@@ -297,22 +310,35 @@ namespace DedStore
         /// <returns></returns>
         private DedStoreTableRowCollection readTextToCollection(Type type)
         {
+            // props
+            var props = type.GetProperties();
+
             // get custom attrs
-            var props =
-                type.GetProperties()
-                    .Where(x => x.CustomAttributes.Any(p => p.AttributeType == typeof(DedStorePrimaryKeyAttribute))).ToList();
+            var pkProps =
+                props.Where(x => x.CustomAttributes.Any(p => p.AttributeType == typeof(DedStorePrimaryKeyAttribute))).ToList();
 
             // check
-            if (props.Count > 1 || props.Count < 1) throw new Exception("Type " + type.FullName + " has no primary key or too many primary keys (using 'DedStorePrimaryKeyAttribute')");
+            if (pkProps.Count > 1 || pkProps.Count < 1) throw new Exception("Type " + type.FullName + " has no primary key or too many primary keys (using 'DedStorePrimaryKeyAttribute')");
 
             // get
-            var pkPropInfo = props.Single();
+            var pkPropInfo = pkProps.Single();
 
             // get table
             checkTypeForChanges(type, pkPropInfo);
 
             // hashtable
             var objects = _getDataMethod(type);
+
+            // get other props
+            var propsWithOneOne =
+                props.Where(x => x.CustomAttributes.Any(p => p.AttributeType == typeof(DedStoreOneToOneAttribute)))
+                    .ToList();
+            var propsWithOneMany =
+                props.Where(x => x.CustomAttributes.Any(p => p.AttributeType == typeof(DedStoreOneToManyAttribute)))
+                    .ToList();
+            var propsWithManyMany =
+                props.Where(x => x.CustomAttributes.Any(p => p.AttributeType == typeof(DedStoreManyToManyAttribute)))
+                    .ToList();
 
             // start
             var collection = new DedStoreTableRowCollection(type)
@@ -324,14 +350,73 @@ namespace DedStore
                     RawItem = x,
                     Added = false,
                     PrimaryKey = pkPropInfo.GetValue(x)
-                })
-                    .ToList(),
-                PrimaryKeyPropertyInfo = pkPropInfo
+                }).ToList(),
+                PrimaryKeyPropertyInfo = pkPropInfo,
+                OneToOneProperties = propsWithOneOne,
+                OneToManyProperties = propsWithOneMany,
+                ManyToManyProperties = propsWithManyMany
             };
+
+            //
+            hydrateOneToOnes(collection, type);
+            hydrateOneToManys(collection);
+            hydrateManyToManys(collection);
 
             //
             return collection;
 
+        }
+
+        /// <summary>
+        /// Hydrate one to ones
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="type"></param>
+        private void hydrateManyToManys(DedStoreTableRowCollection collection)
+        {
+            //throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Hydrate one to manys
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="type"></param>
+        private void hydrateOneToManys(DedStoreTableRowCollection collection)
+        {
+            //throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// hydrate one to ones
+        /// </summary>
+        /// <param name="collection"></param>
+        /// <param name="type"></param>
+        private void hydrateOneToOnes(DedStoreTableRowCollection collection, Type type)
+        {
+            // check
+            if (collection.OneToOneProperties.Any())
+            {
+                var typeProps = type.GetProperties();
+
+                foreach (var prop in collection.OneToOneProperties)
+                {
+                    // get foreign key prop
+                    var foreignKeyProp = typeProps.FirstOrDefault(x => x.Name.ToLower() == (prop.Name.ToLower() + "id"));
+                    if (foreignKeyProp == null) throw new Exception("To use " + prop.Name + " as a One-One relationship, there must be a property named " + prop.Name + "Id on the type " + type.FullName);
+
+                    // get table
+                    var table = GetTable(prop.PropertyType);
+
+                    // loop collection
+                    foreach (var row in collection.TableRows.Select(x => x.RawItem))
+                    {
+                        var foreignKeyValue = foreignKeyProp.GetValue(row);
+                        var matchingObject = table.TableRows.FirstOrDefault(x => x.PrimaryKey.Equals(foreignKeyValue));
+                        if (matchingObject != null) prop.SetValue(row, matchingObject.RawItem);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -408,7 +493,7 @@ namespace DedStore
 
         #endregion
 
-#region ASYNC
+        #region ASYNC
 
         /// <summary>
         /// Async commit
@@ -416,7 +501,7 @@ namespace DedStore
         /// <returns></returns>
         public async Task<DedStoreResponse> CommitAsync()
         {
-            throw new NotImplementedException();
+            return await Task.Run(() => Commit());
         }
 
         /// <summary>
@@ -425,9 +510,9 @@ namespace DedStore
         /// <returns></returns>
         public async Task<DedStoreTable<T>> GetTableAsync<T>()
         {
-            throw new NotImplementedException();
+            return await Task.Run(() => GetTable<T>());
         }
 
-#endregion
+        #endregion
     }
 }

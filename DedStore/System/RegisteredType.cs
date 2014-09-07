@@ -1,4 +1,6 @@
-﻿namespace DedStore.System
+﻿using DedStore.Attributes;
+
+namespace DedStore.System
 {
     public class RegisteredType
     {

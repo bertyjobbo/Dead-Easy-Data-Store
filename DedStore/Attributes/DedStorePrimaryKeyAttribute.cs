@@ -1,7 +1,6 @@
 ﻿using System;
 
-
-namespace DedStore
+namespace DedStore.Attributes
 {
     public class DedStorePrimaryKeyAttribute:Attribute
     {

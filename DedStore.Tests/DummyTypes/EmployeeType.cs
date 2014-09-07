@@ -1,5 +1,7 @@
 ﻿
 
+using DedStore.Attributes;
+
 namespace DedStore.Tests.DummyTypes
 {
     public class EmployeeType
